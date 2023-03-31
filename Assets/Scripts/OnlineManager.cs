@@ -42,7 +42,7 @@ public class OnlineManager : MonoBehaviourPunCallbacks
   // ゲームサーバーへの接続が失敗した時に呼ばれるコールバック
     public override void OnJoinRandomFailed(short returnCode, string message)
     {
-        PhotonNetwork.CreateRoom(null, new RoomOptions() { MaxPlayers = 2}, TypedLobby.Default);
+        PhotonNetwork.CreateRoom(null, new RoomOptions() { MaxPlayers = 1}, TypedLobby.Default);
     }
     private void Update()
     {
