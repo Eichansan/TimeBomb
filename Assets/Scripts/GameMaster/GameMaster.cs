@@ -34,7 +34,6 @@ public class GameMaster : MonoBehaviourPunCallbacks
     bool isStarting;
     private void Awake() 
     {
-        nipperPlayerNum = 0;
         actorNum = PhotonNetwork.LocalPlayer.ActorNumber - 1;
         players = GameDataManager.Instance.players;
         GameDataManager.Instance.actorNum = actorNum;
@@ -91,7 +90,10 @@ public class GameMaster : MonoBehaviourPunCallbacks
         {
             yield return new WaitForSeconds(2f);
             myRole = roleManager.GetRole(actorNum);
-            // nipperPlayerNum = roleManager.GetFirstNipperNum();
+            // 一人テスト用
+            nipperPlayerNum = 0;
+            // 本番用
+            nipperPlayerNum = roleManager.GetFirstNipperNum();
             gameUI.ShowRole(myRole);
             yield return new WaitForSeconds(2f);//本当は5秒くらいにしたい
             gameUI.HideRoleDisPlay();

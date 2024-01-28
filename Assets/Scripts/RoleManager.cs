@@ -25,7 +25,7 @@ public class RoleManager : MonoBehaviourPunCallbacks
     }
     public void RoleShuffle()
     {
-        firstNipperPlayer = UnityEngine.Random.Range(0,GameDataManager.Instance.players);
+        firstNipperPlayer = UnityEngine.Random.Range(0, GameDataManager.Instance.players);
         roles = roles.OrderBy(a => Guid.NewGuid()).ToList();
     }
     public void SendRoleData()
