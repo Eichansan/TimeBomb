@@ -4,7 +4,6 @@ using UnityEngine;
 using DG.Tweening;
 public class DecideButton : MonoBehaviour
 {
-    // [SerializeField] MouseManager mouseManager;
     private void Start() 
     {
         transform.DOScale(0.1f, 1f)
@@ -12,12 +11,4 @@ public class DecideButton : MonoBehaviour
             .SetEase(Ease.OutQuart)
             .SetLoops(-1, LoopType.Restart);
     }
-    // public void PointerEnterButton()
-    // {
-    //     mouseManager.SetOpenedNipper();
-    // }
-    // public void PointerExitButton()
-    // {
-    //     mouseManager.SetClosedNipper();
-    // }
 }

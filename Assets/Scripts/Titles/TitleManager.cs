@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -9,6 +10,8 @@ public class TitleManager : MonoBehaviourPunCallbacks
     [SerializeField] GameObject startButton;
     [SerializeField] GameObject decideButton;
     [SerializeField] InputField nameInputField;
+    [SerializeField] TitleBGMManager BGMManager;
+    [SerializeField] TitleSEManager SEManager;
     private string nickName;
     private void Start() 
     {
@@ -23,10 +26,17 @@ public class TitleManager : MonoBehaviourPunCallbacks
             nameInputField.gameObject.SetActive(false);
             decideButton.SetActive(false);
             startButton.SetActive(true);
+            SEManager.OnDecideButtonSE();
         }
     }
     public void OnStart()
     {
-        FadeManager.Instance.LoadScene("Online", 1f);
+        BGMManager.StopBGM();
+        SEManager.NipperSE();
+        FadeOut();
+    }
+    public void FadeOut()
+    {
+        FadeManager.Instance.LoadScene("Online", 2.5f);
     }
 }

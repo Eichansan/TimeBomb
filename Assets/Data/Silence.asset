@@ -16,3 +16,4 @@ MonoBehaviour:
   type: 0
   number: 1
   icon: {fileID: 0}
+  cardImage: {fileID: 21300000, guid: 97531aa9267f99e4e9e21e4560702885, type: 3}

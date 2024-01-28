@@ -27,7 +27,6 @@ public class RoleManager : MonoBehaviourPunCallbacks
     {
         firstNipperPlayer = UnityEngine.Random.Range(0,GameDataManager.Instance.players);
         roles = roles.OrderBy(a => Guid.NewGuid()).ToList();
-        Debug.Log("finishShaffule");
     }
     public void SendRoleData()
     {
@@ -39,14 +38,12 @@ public class RoleManager : MonoBehaviourPunCallbacks
         }
         PhotonNetwork.CurrentRoom.SetCustomProperties(hashtable);
         hashtable.Clear();
-        for(int i=0; i < roles.Count; i++)Debug.Log("i"+i+" "+roles[i]);
     }
     public override void OnRoomPropertiesUpdate(ExitGames.Client.Photon.Hashtable propertiesThatChanged)
     {
         for (int i = 0; i < roles.Count; i++)
         {
             roles[i] = (propertiesThatChanged["R" + i] is string value) ? value : null;
-            Debug.Log("i"+i+" "+roles[i]);
         }
         firstNipperPlayer = (propertiesThatChanged["f"] is int f_value) ? f_value : 0;
     }

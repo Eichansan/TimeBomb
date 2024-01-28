@@ -7,8 +7,8 @@ using UnityEngine.UI;
 
 public class BattlerHand : MonoBehaviour
 {
-    //手札を制御
     List<Card> list = new List<Card>();
+
     //手札に追加＝自分の子要素にする
     public void Add(Card card)
     {

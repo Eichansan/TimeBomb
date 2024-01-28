@@ -8,6 +8,7 @@ using Photon.Realtime;
 
 public class DecideCard : MonoBehaviourPunCallbacks
 {
+    [SerializeField] GameSEManager gameSEManager; 
     [SerializeField] GameObject decideButton;
     [SerializeField] GameMaster gameMaster;
     public Card selectedCard { get; private set;}
@@ -22,7 +23,7 @@ public class DecideCard : MonoBehaviourPunCallbacks
     public int tmp_pNum { get; private set;}
     public void Set(Card card, int playerNum)
     {
-        Debug.Log("playerNum: "+ playerNum);
+        gameSEManager.CardSelectSE();
         decideButton.SetActive(true);
         selectedCard?.UnSelectCard();
         selectedCard = card;
@@ -34,6 +35,7 @@ public class DecideCard : MonoBehaviourPunCallbacks
     [PunRPC]
     void Set_Others(int selectingCardNum)
     {
+        gameSEManager.CardSelectSE();
         if (tmp_listNum >= 0)gameMaster.player[tmp_pNum].UnSelectingCard(tmp_listNum);
         int round = gameMaster.round;
         tmp_pNum = selectingCardNum/(6-round);
@@ -46,7 +48,6 @@ public class DecideCard : MonoBehaviourPunCallbacks
         isDecided = true;
         decidedCardTypeNum = selectedCard.Base.Number;
         decidedCardNum = selectedCard.cardNum;
-        Debug.Log("playerNum"+selectedPlayerNum +" cardNum"+ decidedCardTypeNum);
         OnDecideAction?.Invoke();
         decideButton.SetActive(false);
     }
@@ -57,7 +58,6 @@ public class DecideCard : MonoBehaviourPunCallbacks
         photonView.RPC(nameof(SetupNextTurn_Others), RpcTarget.Others, decidedCardNum);
         isDecided = false;
         selectedCard = null;
-        Debug.Log(isDecided);
     }
     [PunRPC]
     void SetupNextTurn_Others(int decidedCardNum)

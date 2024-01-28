@@ -12,11 +12,11 @@ public class Battler : MonoBehaviourPunCallbacks
     public BattlerHand Hand { get => hand; }
     public int actorNum { get; private set;}
     public int playerNum { get; private set;}
-    private void Start() 
+    public void Init()
     {
+      actorNum = GameDataManager.Instance.actorNum;
       playerNum = int.Parse(this.gameObject.ToString()[6].ToString());
     }
-
     public void SetCardToHand(Card card)
     {
       hand.Add(card);
@@ -33,7 +33,6 @@ public class Battler : MonoBehaviourPunCallbacks
       {
         return;
       }
-      actorNum = GameDataManager.Instance.actorNum;
       if (gm.nipperPlayerNum == actorNum) decideCard.Set(card, playerNum);
     }
     public void FlipCard(int cardNum)

@@ -5,6 +5,7 @@ using UnityEngine;
 // MonoBehaviourPunCallbacksを継承して、PUNのコールバックを受け取れるようにする
 public class OnlineManager : MonoBehaviourPunCallbacks
 {
+    [SerializeField] OnlineSEManager onlineSEManager;
     [SerializeField] GameObject loadingAnim;
     [SerializeField] GameObject matchingMessage;
     [SerializeField] GameObject matchingButton;
@@ -15,10 +16,12 @@ public class OnlineManager : MonoBehaviourPunCallbacks
 
     private void Start() 
     {
+        GameDataManager.Instance.inRoom = false;
         matchingButton.SetActive(false);
     }
     public void OnMatchingButton() 
     {
+        onlineSEManager.OnDecideButtonSE();
         loadingAnim.SetActive(true);
         matchingMessage.SetActive(true);
         matchingButton.SetActive(false); 
@@ -65,18 +68,21 @@ public class OnlineManager : MonoBehaviourPunCallbacks
         GameDataManager.Instance.players = 6;
         ButtonsSetInactive();
         matchingButton.SetActive(true); 
+        onlineSEManager.OnDecideButtonSE();
     }
     public void OnSevenPlayersButton() 
     {
         GameDataManager.Instance.players = 7;
         ButtonsSetInactive();
         matchingButton.SetActive(true); 
+        onlineSEManager.OnDecideButtonSE();
     }
     public void OnEightPlayersButton() 
     {
         GameDataManager.Instance.players = 8;
         ButtonsSetInactive();
         matchingButton.SetActive(true); 
+        onlineSEManager.OnDecideButtonSE();
     }
     void ButtonsSetInactive() 
     {

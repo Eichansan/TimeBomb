@@ -8,13 +8,17 @@ using Photon.Realtime;
 
 public class GameMaster : MonoBehaviourPunCallbacks
 {
+    [SerializeField] GameSEManager gameSEManager; 
     [SerializeField] CardGenerator cardGenarator; 
     [SerializeField] MouseManager mouseManager; 
     [SerializeField] public Battler[] player;
     [SerializeField] List<Lamp> lamp = new List<Lamp>();
     [SerializeField] DecideCard decideCard;
     [SerializeField] GameUI gameUI;
+    [SerializeField] Declare declare;
     [SerializeField] GameObject startButton;
+    [SerializeField] GameObject retryButton;
+    [SerializeField] GameObject declareObjs;
     RuleBook ruleBook;
     RoleManager roleManager;
     public int actorNum { get; private set;}
@@ -30,11 +34,12 @@ public class GameMaster : MonoBehaviourPunCallbacks
     bool isStarting;
     private void Awake() 
     {
-        // startButton.SetActive(true);//debug
-        nipperPlayerNum = 0;//debug
+        nipperPlayerNum = 0;
         actorNum = PhotonNetwork.LocalPlayer.ActorNumber - 1;
         players = GameDataManager.Instance.players;
         GameDataManager.Instance.actorNum = actorNum;
+        for (int i=0; i<players; i++)player[i].Init();
+        declareObjs.SetActive(false);
         gameUI.Init();
         SetAvatar();
         SetPlayerPosition();
@@ -57,9 +62,6 @@ public class GameMaster : MonoBehaviourPunCallbacks
             if (PhotonNetwork.CurrentRoom.MaxPlayers == PhotonNetwork.CurrentRoom.PlayerCount)
             {
                 isStarting = true;
-                // players = GameDataManager.Instance.players;
-                // GameDataManager.Instance.actorNum = actorNum;
-                //// StartCoroutine(Setup());
                 if (PhotonNetwork.IsMasterClient)
                 {
                     startButton.SetActive(true);
@@ -70,6 +72,7 @@ public class GameMaster : MonoBehaviourPunCallbacks
 
     public void OnStartButton() 
     {
+        gameSEManager.OnDecideButtonSE();
         startButton.SetActive(false);
         roleManager.SendRoleData();
         photonView.RPC(nameof(RPCSetCoroutineSetup), RpcTarget.AllViaServer);
@@ -79,7 +82,6 @@ public class GameMaster : MonoBehaviourPunCallbacks
     void RPCSetCoroutineSetup()
     {
         StartCoroutine(Setup());
-        Debug.Log("RPCSetCoroutineSetup");
     }
 
     //カードを生成して配る
@@ -100,6 +102,7 @@ public class GameMaster : MonoBehaviourPunCallbacks
         {
             RemoveCardFromPlayers();
         }
+        gameSEManager.RoundnSE();
         gameUI.ShowRound(round);//ラウンドの表示
         yield return new WaitForSeconds(2f);
         gameUI.SetupNextRound();//ラウンドの非表示
@@ -111,13 +114,13 @@ public class GameMaster : MonoBehaviourPunCallbacks
             photonView.RPC(nameof(RPCSetCoroutineSendCard), RpcTarget.AllViaServer);
         }
         yield return new WaitForSeconds(3f);
-        LampOn(true);
+        LampSet(true);
+        declareObjs.SetActive(true);
         if (nipperPlayerNum == actorNum)
         {
             mouseManager.SetClosedNipper();
             gameUI.ShowYourTurn(myRole);
         }
-        Debug.Log("firstNipperPlayerNum: " + nipperPlayerNum);
     }
     IEnumerator SendCardToPlayers()
     {   
@@ -134,6 +137,7 @@ public class GameMaster : MonoBehaviourPunCallbacks
     }
     void DecidedAction()//切断ボタンを押したら実行される
     {
+        gameSEManager.NipperSE();
         mouseManager.SetClosedNipper();
         photonView.RPC(nameof(RPCSetCoroutineJudge), RpcTarget.AllViaServer, decideCard.selectedPlayerNum, decideCard.decidedCardTypeNum, decideCard.decidedCardNum);
     }
@@ -146,7 +150,8 @@ public class GameMaster : MonoBehaviourPunCallbacks
     }
     IEnumerator JudgeCard(int selectedPlayerNum, int decidedCardTypeNum, int decidedCardNum)
     {
-        yield return new WaitForSeconds(4f);//TODO秒数をランダムで決めたい
+        StartCoroutine(gameSEManager.HeartBeatSE());
+        yield return new WaitForSeconds(6f);//TODO秒数をランダムで決めたい
         Result result = ruleBook.GetResult(decidedCardTypeNum);
         preNipperPlayerNum = nipperPlayerNum;
         nipperPlayerNum = selectedPlayerNum;
@@ -158,11 +163,13 @@ public class GameMaster : MonoBehaviourPunCallbacks
                 break;
             case Result.success:
                 gameUI.ShowTurnResult("★解除★");
+                gameSEManager.SuccessSE();
                 success++;
                 sum_success++;
                 break;
             case Result.Boom:
                 gameUI.ShowTurnResult("Boom!");
+                gameSEManager.BombSE();
                 Boom++;
                 break;
         }
@@ -183,6 +190,7 @@ public class GameMaster : MonoBehaviourPunCallbacks
 
     void ShowGameResult(string winner)
     {
+        declareObjs.SetActive(false);
         gameUI.ShowGameResult(winner);
     }
     void SetupNextTurn(int decidedCardNum)
@@ -198,10 +206,9 @@ public class GameMaster : MonoBehaviourPunCallbacks
             int tmp_listNum = decidedCardNum%(6-round);
             player[tmp_pNum].FlipCard(tmp_listNum);
         }
-        if (success>0)lamp[success-1].On();
+        if (sum_success>0)lamp[sum_success-1].On();
         gameUI.SetupNextTurn();
         turnCount++;
-        Debug.Log("turnCount "+turnCount);
         if (turnCount < players)
         {
             if (nipperPlayerNum == actorNum)
@@ -225,28 +232,22 @@ public class GameMaster : MonoBehaviourPunCallbacks
         {
             ShowGameResult("BOMBER");
         }
-        LampOn(false);
+        LampSet(false);
+        declareObjs.SetActive(false);
+        declare.SetupNextRound();
         StartCoroutine(Setup());
     }
     void SetAvatar()
     {
-        if (actorNum <= 2)
-        {
-            PhotonNetwork.Instantiate("Avatar", new Vector3 (-0.5f, 1.3f, 0f), Quaternion.identity);
-        }
-        else
-        {
-            PhotonNetwork.Instantiate("Avatar", new Vector3 (-0.5f, -1.3f, 0f), Quaternion.identity);
-        }
+        PhotonNetwork.Instantiate("Avatar", new Vector3 (-0.5f, 1.3f, 0f), Quaternion.identity);
     }
     void SetPlayerPosition()
     {
         Vector3 tmp_player0Pos = player[0].transform.position;
         player[0].transform.position = player[actorNum].transform.position;
         player[actorNum].transform.position = tmp_player0Pos;
-        Debug.Log("0pos: "+ tmp_player0Pos + "mypos: "+ player[actorNum].transform.position);
     }
-    void LampOn(bool on)
+    void LampSet(bool on)
     {
         for (int i=0; i < lamp.Count; i++)
         {
@@ -255,6 +256,7 @@ public class GameMaster : MonoBehaviourPunCallbacks
     }
     public void OnRetryButton()
     {
+        retryButton.SetActive(false);
         SendRetryMemberNum();
     }
     public void OnTitleButton()
@@ -266,8 +268,18 @@ public class GameMaster : MonoBehaviourPunCallbacks
         }
         FadeManager.Instance.LoadScene("Title", 1f);
     }
+    public void OnExitButton()
+    {
+        if (PhotonNetwork.IsConnected)
+        {
+            PhotonNetwork.LeaveRoom();
+            PhotonNetwork.Disconnect();
+        }
+        FadeManager.Instance.LoadScene("Online", 1f);
+    }
     public override void OnPlayerLeftRoom(Player otherPlayer)
     {
+        declareObjs.SetActive(false);
         gameUI.ShowLeavePanel();
         if (PhotonNetwork.IsConnected)
         {
@@ -297,7 +309,6 @@ public class GameMaster : MonoBehaviourPunCallbacks
     void RPCSetCoroutineJudge(int selectedPlayerNum, int decidedCardTypeNum, int decidedCardNum)
     {
         StartCoroutine(JudgeCard(selectedPlayerNum, decidedCardTypeNum, decidedCardNum));
-        Debug.Log("RPCSetCoroutine");
     }
     [PunRPC]
     void RPCSetCoroutineSendCard()

@@ -50,7 +50,6 @@ public class CardGenerator : MonoBehaviourPunCallbacks
     }
     public override void OnRoomPropertiesUpdate(ExitGames.Client.Photon.Hashtable propertiesThatChanged)//
     {
-        Debug.Log("typeListUpdate");
         for (int i = 0; i < typeNumList.Count; i++)
         {
             typeNumList[i] = (propertiesThatChanged["No" + i] is int value) ? value : 0;

@@ -19,6 +19,7 @@ public class LoadingAnimPlayer : MonoBehaviour
                 .Append(circles[i].rectTransform.DOAnchorPosY(0f, DURATION / 4))
                 .AppendInterval((DURATION / 2) * ((float)(1 - i) / circles.Length));
             sequence.Play();
+
         }
     }
 }

@@ -10,7 +10,7 @@ public class Card : MonoBehaviourPunCallbacks//, IPunObservable
 {
     // カードUI
     //　ゲーム内の処理
-    [SerializeField] Text nameText;
+    [SerializeField] Image cardImage;
     public int cardNum { get; private set;}
     // [SerializeField] Image icon;
     // [SerializeField] Text descriptionText;
@@ -23,7 +23,7 @@ public class Card : MonoBehaviourPunCallbacks//, IPunObservable
     public void Set(int c_i,CardBase cardBase,bool isOther)
     {
         Base = cardBase;
-        nameText.text = cardBase.Name;
+        cardImage.sprite = cardBase.CardImage;
         cardNum = c_i;
         outlinePanel.SetActive(false);
         if (isOther)
@@ -58,30 +58,17 @@ public class Card : MonoBehaviourPunCallbacks//, IPunObservable
         transform.position = new Vector3(transform.position.x,transform.position.y,0);
         transform.localScale = Vector3.one*0.5f;
     }
-    
-    public void RPCPointerEnterOther()
-    {
-        photonView.RPC(nameof(PointerEnterOther), RpcTarget.All);
-    }
-    public void RPCPointerExitOther()
-    {
-        photonView.RPC(nameof(PointerExitOther), RpcTarget.All);
-    }
-    [PunRPC]
     public void PointerEnterOther()
     {
         transform.position += Vector3.up * 0.3f;
         transform.localScale *= 1.3f;
         GetComponentInChildren<Canvas>().sortingLayerName ="Overlay";
-        Debug.Log("PointerEnter");
     }
-    [PunRPC]
     public void PointerExitOther()
     {
         transform.position -= Vector3.up * 0.3f;
         transform.localScale /= 1.3f;
         GetComponentInChildren<Canvas>().sortingLayerName ="Default";
-        Debug.Log("PointerExit");
     }
     public void PointerEnterMine()
     {
